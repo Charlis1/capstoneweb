@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lessons - Hardware Quest</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+    :root {
+      /* NEBULA palette */
+      --nebula-deep: #013026;
+      --nebula-blue: #014760;
+      --nebula-green: #107e57;
+      --nebula-lime: #a1ce3f;
+      --nebula-light: #cbe58e;
+
+      --bg-gradient: linear-gradient(135deg, #013026 0%, #014760 52%, #013026 100%);
+      --card-bg: rgba(1, 25, 28, 0.72);
+      --card-border: rgba(203, 229, 142, 0.35);
+      --card-hover-border: rgba(161, 206, 63, 0.65);
+      --neon-cyan: #cbe58e;
+      --neon-purple: #107e57;
+      --neon-gold: #a1ce3f;
+      --text-main: #f4ffd8;
+      --text-muted: #d0e8d5;
+      --glass-blur: blur(16px);
+
+      --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Press Start 2P', 'Courier New', monospace;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      /* Animated multi-stop gradient backdrop (self-contained, no image needed) */
+      background:
+        linear-gradient(rgba(1, 48, 38, 0.55), rgba(1, 48, 38, 0.72)),
+        var(--bg-gradient);
+      background-size: 300% 300%;
+      animation: bgShift 22s ease infinite;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    @keyframes bgShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    body.menu-open {
+      overflow: hidden;
+    }
+
+    /* ---------- Background Ambient Glows ---------- */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      z-index: -1;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    body::before {
+      width: 400px;
+      height: 400px;
+      background: rgba(16, 126, 87, 0.28);
+      top: 10%;
+      left: 15%;
+    }
+    body::after {
+      width: 500px;
+      height: 500px;
+      background: rgba(161, 206, 63, 0.15);
+      bottom: 10%;
+      right: 15%;
+      animation-delay: -9s;
+    }
+
+    @keyframes drift {
+      0%   { transform: translate(0, 0) scale(1); }
+      50%  { transform: translate(40px, -30px) scale(1.15); }
+      100% { transform: translate(-30px, 40px) scale(0.9); }
+    }
+
+    /* ---------- Animated Particle Field ---------- */
+    .particles {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--neon-gold);
+      border-radius: 50%;
+      opacity: 0;
+      animation: floatParticle linear infinite;
+      box-shadow: 0 0 8px var(--neon-gold);
+    }
+
+    @keyframes floatParticle {
+      0% {
+        transform: translateY(110vh) scale(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.7;
+        transform: translateY(100vh) scale(1);
+      }
+      90% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(-10vh) scale(0.5);
+        opacity: 0;
+      }
+    }
+
+    /* ---------- Glassmorphism Card Style ---------- */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      transition: all 0.4s var(--ease-out-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -150%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(110deg, transparent, rgba(203, 229, 142, 0.12), transparent);
+      transition: left 0.8s var(--ease-out-soft);
+      pointer-events: none;
+    }
+
+    .card:hover::before {
+      left: 150%;
+    }
+
+    .card:hover {
+      border-color: var(--card-hover-border);
+      box-shadow: 0 8px 32px 0 rgba(161, 206, 63, 0.18), 0 0 0 1px rgba(161, 206, 63, 0.1);
+      transform: translateY(-3px);
+    }
+
+    @keyframes cardShine {
+      0%, 25% { left: -150%; }
+      75%, 100% { left: 150%; }
+    }
+
+    @keyframes cardPulse {
+      0%, 100% { opacity: 0.08; }
+      50% { opacity: 0.28; }
+    }
+
+    .card::before {
+      animation: cardShine 3.6s linear infinite;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      box-shadow: inset 0 0 24px rgba(161, 206, 63, 0.45);
+      opacity: 0.08;
+      pointer-events: none;
+      animation: cardPulse 3.6s ease-in-out infinite;
+    }
+
+    .card:nth-child(2)::before { animation-delay: 1s; }
+    .card:nth-child(3)::before { animation-delay: 2s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .page { 
+      width: 100%; 
+      max-width: 1200px; 
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 { 
+      font-size: clamp(1.8rem, 6vw, 2.4rem);
+      font-weight: 700;
+      margin: 0 0 2rem;
+      color: var(--text-main);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+      letter-spacing: 0.08em;
+      animation: fadeUp 0.6s var(--ease-out-soft) both;
+    }
+
+    .lessons { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 1.5rem;
+    }
+
+    .lesson-card {
+      display: grid;
+      grid-template-columns: 64px 1fr 80px;
+      align-items: center;
+      gap: 1.5rem;
+      animation: fadeUp 0.7s var(--ease-out-soft) both;
+    }
+
+    .lesson-card:nth-child(1) { animation-delay: 0.1s; }
+    .lesson-card:nth-child(2) { animation-delay: 0.2s; }
+    .lesson-card:nth-child(3) { animation-delay: 0.3s; }
+    .lesson-card:nth-child(4) { animation-delay: 0.4s; }
+    .lesson-card:nth-child(5) { animation-delay: 0.5s; }
+
+    .lesson-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-gold));
+      box-shadow: 0 0 16px rgba(161, 206, 63, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .lesson-content { 
+      min-width: 0; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center;
+      gap: 0.8rem;
+    }
+
+    .lesson-title { 
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+    }
+
+    .progress-row { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.8rem;
+    }
+
+    .progress-track { 
+      flex: 1; 
+      height: 6px; 
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+    }
+
+    .progress-fill { 
+      height: 100%; 
+      background: linear-gradient(90deg, var(--neon-purple), var(--neon-gold));
+      border-radius: 4px;
+      transition: width 0.8s var(--ease-out-soft);
+      box-shadow: 0 0 12px rgba(161, 206, 63, 0.5);
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .percent { 
+      width: 40px;
+      text-align: right; 
+      font-size: 0.75rem;
+      color: var(--neon-cyan);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .go-btn {
+      width: 80px;
+      height: 56px;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--neon-purple), var(--neon-gold));
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-out-soft);
+      box-shadow: 0 4px 12px rgba(161, 206, 63, 0.28);
+      font-family: 'Press Start 2P', 'Courier New', monospace;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .go-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: left 0.5s ease;
+    }
+
+    .go-btn:hover {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 6px 20px rgba(161, 206, 63, 0.5);
+      transform: translateY(-3px);
+    }
+
+    .go-btn:hover::before {
+      left: 100%;
+    }
+
+    .go-btn:active { 
+      transform: translateY(0);
+    }
+
+    /* ---------- Menu ---------- */
+    .menu {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 20;
+    }
+
+    .menu-toggle {
+      position: relative;
+      z-index: 35;
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      background: rgba(1, 48, 38, 0.9);
+      color: var(--neon-cyan);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+      transition: all 0.3s var(--ease-out-soft);
+    }
+
+    .menu-toggle:hover,
+    .menu-toggle:focus-visible {
+      border-color: var(--card-hover-border);
+      outline: none;
+      color: var(--neon-gold);
+      box-shadow: 0 0 20px rgba(161, 206, 63, 0.4);
+    }
+
+    .menu-icon,
+    .menu-icon::before,
+    .menu-icon::after {
+      width: 20px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      display: block;
+      content: '';
+      transition: all 0.3s ease;
+    }
+
+    .menu-icon { position: relative; }
+    .menu-icon::before { position: absolute; top: -6px; }
+    .menu-icon::after { position: absolute; top: 6px; }
+
+    .menu.open .menu-icon { background: transparent; }
+    .menu.open .menu-icon::before { top: 0; transform: rotate(45deg); }
+    .menu.open .menu-icon::after { top: 0; transform: rotate(-45deg); }
+
+    .menu-panel {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-12px) scale(0.98);
+      transform-origin: top right;
+      position: fixed;
+      top: calc(1rem + 48px + 0.75rem);
+      right: 1rem;
+      width: 260px;
+      height: calc(100vh - 1rem - 48px - 0.75rem - 1rem);
+      max-width: 88vw;
+      padding: 1.25rem 1rem;
+      background: rgba(1, 48, 38, 0.97);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      box-shadow: -10px 10px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(161, 206, 63, 0.12);
+      transition: opacity 0.3s ease, transform 0.3s var(--ease-out-soft), visibility 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      overflow-y: auto;
+    }
+
+    .menu-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 25;
+      border: 0;
+      background: rgba(0, 16, 13, 0.58);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .menu.open .menu-panel {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+    }
+
+    .menu.open .menu-backdrop {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .menu-link {
+      padding: 0.7rem 0.8rem;
+      border-radius: 9px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 0.75rem;
+      transition: all 0.2s ease;
+    }
+
+    .menu-link:hover,
+    .menu-link:focus-visible {
+      background: rgba(161, 206, 63, 0.14);
+      color: white;
+      outline: none;
+      transform: translateX(4px);
+    }
+
+    /* ---------- Cursor glow follower ---------- */
+    .cursor-glow {
+      position: fixed;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: -1;
+      background: radial-gradient(circle, rgba(161, 206, 63, 0.12), transparent 60%);
+      transform: translate(-50%, -50%);
+      transition: opacity 0.3s ease;
+      opacity: 0;
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 900px) {
+      body { padding: 1.5rem; }
+      h1 { font-size: clamp(1.5rem, 5vw, 2rem); }
+      .lesson-card { grid-template-columns: 56px 1fr 70px; gap: 1rem; }
+      .lesson-icon { width: 56px; height: 56px; font-size: 1.6rem; }
+      .go-btn { width: 70px; height: 50px; font-size: 0.6rem; }
+      .lesson-title { font-size: 1rem; }
+    }
+
+    @media (max-width: 540px) {
+      body { padding: 1rem; }
+      h1 { font-size: 1.3rem; margin-bottom: 1.5rem; }
+      .lesson-card { grid-template-columns: 48px 1fr 60px; gap: 0.8rem; }
+      .lesson-icon { width: 48px; height: 48px; font-size: 1.4rem; }
+      .go-btn { width: 60px; height: 44px; font-size: 0.55rem; }
+      .lesson-title { font-size: 0.9rem; }
+      .percent { font-size: 0.7rem; }
+      .progress-track { height: 5px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+  <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+  <!-- Cursor glow -->
+  <div class="cursor-glow" id="cursor-glow"></div>
+
+  <!-- Hamburger menu (fixed in the top-right corner) -->
+  <div class="menu">
+    <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="app-menu">
+      <span class="menu-icon" aria-hidden="true"></span>
+    </button>
+    <button class="menu-backdrop" type="button" aria-label="Close menu" tabindex="-1" hidden></button>
+    <nav class="menu-panel" id="app-menu" aria-label="App menu" hidden>
+      <a class="menu-link" href="webnebulammm.html">Dashboard</a>
+      <a class="menu-link" href="#profile">Profile</a>
+      <a class="menu-link" href="#settings">Settings</a>
+      <a class="menu-link" href="#help">Help &amp; Support</a>
+      <a class="menu-link" href="#logout">Log out</a>
+    </nav>
+  </div>
+
+  <!-- Particle field -->
+  <div class="particles" id="particles"></div>
+
+  <main class="page">
+    <h1>📚 Lessons</h1>
+    <section class="lessons" aria-label="Lessons">
+      <div class="card">
+        <article class="lesson-card">
+          <div class="lesson-icon">🖥️</div>
+          <div class="lesson-content">
+            <div class="lesson-title">External Computer Parts</div>
+            <div class="progress-row">
+              <div class="progress-track"><div class="progress-fill" style="width: 9%;"></div></div>
+              <span class="percent">9%</span>
+            </div>
+          </div>
+          <button class="go-btn" onclick="openLesson('External Computer Parts')">Go →</button>
+        </article>
+      </div>
+
+      <div class="card">
+        <article class="lesson-card">
+          <div class="lesson-icon">⚙️</div>
+          <div class="lesson-content">
+            <div class="lesson-title">Internal Computer Parts</div>
+            <div class="progress-row">
+              <div class="progress-track"><div class="progress-fill" style="width: 0%;"></div></div>
+              <span class="percent">0%</span>
+            </div>
+          </div>
+          <button class="go-btn" onclick="openLesson('Internal Computer Parts')">Go →</button>
+        </article>
+      </div>
+
+      <div class="card">
+        <article class="lesson-card">
+          <div class="lesson-icon">⌨️</div>
+          <div class="lesson-content">
+            <div class="lesson-title">Input Devices</div>
+            <div class="progress-row">
+              <div class="progress-track"><div class="progress-fill" style="width: 0%;"></div></div>
+              <span class="percent">0%</span>
+            </div>
+          </div>
+          <button class="go-btn" onclick="openLesson('Input Devices')">Go →</button>
+        </article>
+      </div>
+
+      <div class="card">
+        <article class="lesson-card">
+          <div class="lesson-icon">🖨️</div>
+          <div class="lesson-content">
+            <div class="lesson-title">Output Devices</div>
+            <div class="progress-row">
+              <div class="progress-track"><div class="progress-fill" style="width: 0%;"></div></div>
+              <span class="percent">0%</span>
+            </div>
+          </div>
+          <button class="go-btn" onclick="openLesson('Output Devices')">Go →</button>
+        </article>
+      </div>
+
+      <div class="card">
+        <article class="lesson-card">
+          <div class="lesson-icon">💾</div>
+          <div class="lesson-content">
+            <div class="lesson-title">Storage Devices</div>
+            <div class="progress-row">
+              <div class="progress-track"><div class="progress-fill" style="width: 0%;"></div></div>
+              <span class="percent">0%</span>
+            </div>
+          </div>
+          <button class="go-btn" onclick="openLesson('Storage Devices')">Go →</button>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /* ---------- Menu toggle ---------- */
+    const menu = document.querySelector('.menu');
+    const menuToggle = document.querySelector('.menu-toggle');
+    const menuPanel = document.getElementById('app-menu');
+    const menuBackdrop = document.querySelector('.menu-backdrop');
+    const menuLinks = menuPanel.querySelectorAll('.menu-link');
+    let menuCloseTimer;
+
+    const closeMenu = (returnFocus = false) => {
+      menu.classList.remove('open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      menuToggle.setAttribute('aria-label', 'Open menu');
+      document.body.classList.remove('menu-open');
+      clearTimeout(menuCloseTimer);
+      menuCloseTimer = setTimeout(() => {
+        menuPanel.hidden = true;
+        menuBackdrop.hidden = true;
+      }, 300);
+      if (returnFocus) menuToggle.focus();
+    };
+
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = !menu.classList.contains('open');
+      if (isOpen) {
+        menu.classList.add('open');
+        document.body.classList.add('menu-open');
+        menuToggle.setAttribute('aria-expanded', 'true');
+        menuToggle.setAttribute('aria-label', 'Close menu');
+        clearTimeout(menuCloseTimer);
+        menuPanel.hidden = false;
+        menuBackdrop.hidden = false;
+        menuLinks[0].focus();
+      } else {
+        closeMenu(true);
+      }
+    });
+
+    menuPanel.addEventListener('click', (event) => {
+      if (event.target.closest('.menu-link')) closeMenu();
+    });
+
+    menuBackdrop.addEventListener('click', () => closeMenu(true));
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && menu.classList.contains('open')) {
+        closeMenu(true);
+      }
+    });
+
+    /* ---------- Particle field ---------- */
+    (function spawnParticles() {
+      const container = document.getElementById('particles');
+      const count = 32;
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('span');
+        p.className = 'particle';
+        const size = Math.random() * 4 + 2;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (Math.random() * 12 + 10) + 's';
+        p.style.animationDelay = (Math.random() * 15) + 's';
+        p.style.opacity = Math.random() * 0.5 + 0.2;
+        p.style.background = Math.random() > 0.5 ? 'var(--neon-gold)' : 'var(--neon-cyan)';
+        p.style.boxShadow = `0 0 8px ${Math.random() > 0.5 ? '#a1ce3f' : '#cbe58e'}`;
+        container.appendChild(p);
+      }
+    })();
+
+    /* ---------- Animate progress bars on page load ---------- */
+    window.addEventListener('load', () => {
+      document.querySelectorAll('.progress-fill').forEach(bar => {
+        const w = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => { bar.style.width = w; }, 200);
+      });
+    });
+
+    /* ---------- Lesson function ---------- */
+    function openLesson(name) {
+      alert('Opening: ' + name);
+    }
+
+    /* ---------- Cursor glow follower ---------- */
+    const cursorGlow = document.getElementById('cursor-glow');
+    let glowVisible = false;
+    window.addEventListener('mousemove', (e) => {
+      if (!glowVisible) { cursorGlow.style.opacity = '1'; glowVisible = true; }
+      cursorGlow.style.left = e.clientX + 'px';
+      cursorGlow.style.top = e.clientY + 'px';
+    });
+    window.addEventListener('mouseleave', () => {
+      cursorGlow.style.opacity = '0';
+      glowVisible = false;
+    });
+  </script>
+</body>
+</html>
